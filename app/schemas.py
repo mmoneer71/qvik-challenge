@@ -5,9 +5,11 @@ class Message(BaseModel):
     message: str
 
 
-class Channel(BaseModel):
-    id: int
+class ChannelCreate(BaseModel):
     name: str
+
+class Channel(ChannelCreate):
+    id: int
 
     class Config:
         orm_mode = True
