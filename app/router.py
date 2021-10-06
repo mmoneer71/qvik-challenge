@@ -1,11 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
+from app.database import Base, engine
 from app.schemas import Message
 from app.samples import sample_index_message
 from app.service import get_sample_index
 
 api_router = APIRouter()
 
+Base.metadata.create_all(bind=engine)
 
 @api_router.get(
     "/",

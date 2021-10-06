@@ -12,5 +12,5 @@ app = FastAPI(
 )
 
 app.include_router(api_router)
-app.include_router(articles_router, prefix="/articles", tags=["articles"])
-app.include_router(channels_router, prefix="/channels", tags=["channels"])
+app.include_router(articles_router, prefix="/articles", tags=["Articles"])
+app.include_router(channels_router, prefix="/channels", tags=["Channels"])
