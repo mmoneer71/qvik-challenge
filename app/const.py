@@ -1,1 +1,1 @@
-COMMON_PREFIX = "/channels"
+CHANNEL_PREFIX = "/channels"

@@ -8,17 +8,11 @@ class Message(BaseModel):
 class ChannelCreate(BaseModel):
     name: str
 
-
 class Channel(ChannelCreate):
     id: int
 
     class Config:
         orm_mode = True
-
-
-class ArticleCreate(BaseModel):
-    url: str
-    channel_name: str
 
 
 class Article(BaseModel):
