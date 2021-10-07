@@ -19,6 +19,10 @@ class ArticleCreate(BaseModel):
     url: HttpUrl
     channel_id: int
 
+class ArticleUpdate(BaseModel):
+    id: int
+    channel_name: str
+
 class Article(ArticleCreate):
     id: int
     word_count: int

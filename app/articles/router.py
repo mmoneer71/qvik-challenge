@@ -3,7 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm.session import Session
 
 from app.samples import sample_article, sample_article_list, sample_422, sample_404, sample_bckgrnd
-from app.schemas import Article, ArticleCreate
+from app.schemas import Article, ArticleCreate, ArticleUpdate
 from app.articles import service as ArticlesService
 from app.database import get_db_session
 
@@ -69,7 +69,7 @@ def add_article(new_article: ArticleCreate, background_tasks: BackgroundTasks, d
 
 
 @articles_router.put(
-    "/{article_id}",
+    "/",
     responses={
         200: {
             "model": Article,
@@ -86,8 +86,8 @@ def add_article(new_article: ArticleCreate, background_tasks: BackgroundTasks, d
         },
     },
 )
-def update_article_channel(article_id: int, channel_name: str, db: Session = Depends(get_db_session)) -> Article:
-    return ArticlesService.update_article(db_session=db, article_id=article_id, new_channel_name=channel_name)
+def update_article_channel(updated_article: ArticleUpdate, db: Session = Depends(get_db_session)) -> Article:
+    return ArticlesService.update_article(db_session=db, article_id=updated_article.id, new_channel_name=updated_article.channel_name)
 
 @articles_router.delete(
     "/{article_id}",

@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
 from newspaper import Article as NewspaperArticle, ArticleException as ThirdPartyArticleException
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from app.const import HTM_SUFFIX, HTML_SUFFIX
 
 from app.db_models import Channel as DbChannel, Article as DbArticle
 from app.schemas import Article as APIArticle
@@ -77,6 +78,9 @@ def delete_article_by_id(db_session: Session, article_id: int):
 
 
 def validate_article_and_channel(db_session: Session, article_url: str, channel_id: int) -> str:
+    if not article_url.lower().endswith(HTML_SUFFIX) and not article_url.lower().endswith(HTM_SUFFIX):
+        raise ArticleException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Article must be a .html page")
+
     channel = db_session.query(DbChannel).filter(DbChannel.id == channel_id).first()
     article = db_session.query(DbArticle).filter(DbArticle.url.is_(article_url)).first()
     if not channel:
