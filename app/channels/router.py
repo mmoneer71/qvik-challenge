@@ -21,7 +21,7 @@ channels_router = APIRouter()
         }
     },
 )
-async def get_channels(db: Session = Depends(get_db_session)) -> List[Channel]:
+def get_channels(db: Session = Depends(get_db_session)) -> List[Channel]:
     return get_all_channels(db_session=db)
 
 
@@ -43,7 +43,7 @@ async def get_channels(db: Session = Depends(get_db_session)) -> List[Channel]:
         },
     },
 )
-async def get_channel(channel_id: int, db: Session = Depends(get_db_session)) -> Channel:
+def get_channel(channel_id: int, db: Session = Depends(get_db_session)) -> Channel:
     return get_channel_by_id(db_session=db, channel_id=channel_id)
 
 @channels_router.post(
@@ -60,11 +60,11 @@ async def get_channel(channel_id: int, db: Session = Depends(get_db_session)) ->
         },
     },
 )
-async def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_session)) -> Channel:
+def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_session)) -> Channel:
     return create_channel(db_session=db, new_channel_name=new_channel.name)
 
 @channels_router.put(
-    "/{channel_id}",
+    "/",
     responses={
         200: {
             "model": Channel,
@@ -81,7 +81,7 @@ async def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_s
         },
     },
 )
-async def update_channel(updated_channel: Channel, db: Session = Depends(get_db_session)) -> Channel:
+def update_channel(updated_channel: Channel, db: Session = Depends(get_db_session)) -> Channel:
     return update_channel_name(db_session=db, channel_id=updated_channel.id, new_channel_name=updated_channel.name)
 
 
@@ -101,6 +101,6 @@ async def update_channel(updated_channel: Channel, db: Session = Depends(get_db_
         },
     },
 )
-async def delete_channel(channel_id: int, db: Session = Depends(get_db_session)) -> str:
+def delete_channel(channel_id: int, db: Session = Depends(get_db_session)) -> str:
     delete_channel_by_id(db_session=db, channel_id=channel_id)
     return "Channel deleted successfully"

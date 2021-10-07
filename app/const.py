@@ -1,1 +1,1 @@
-# Constants placeholder
+COMMON_PREFIX = "/channels"

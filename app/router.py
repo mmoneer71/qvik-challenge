@@ -20,5 +20,5 @@ Base.metadata.create_all(bind=engine)
         }
     },
 )
-async def index() -> Message:
+def index() -> Message:
     return get_sample_index()
