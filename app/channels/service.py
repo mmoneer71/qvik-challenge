@@ -3,7 +3,6 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
-from starlette import status
 from app.db_models import Channel as DbChannel
 from app.schemas import Channel as APIChannel
 
