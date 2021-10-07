@@ -9,6 +9,7 @@ api_router = APIRouter()
 
 Base.metadata.create_all(bind=engine)
 
+
 @api_router.get(
     "/",
     tags=["Index"],

@@ -9,6 +9,7 @@ from app.networking import app
 def app_client() -> TestClient:
     return TestClient(app)
 
+
 @pytest.fixture
 def clean_state():
     Base.metadata.drop_all(bind=engine)

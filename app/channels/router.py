@@ -3,7 +3,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm.session import Session
 
 from app.channels import service as ChannelsService
-from app.samples import sample_404, sample_422, sample_article_list, sample_channel, sample_channel_list
+from app.samples import (
+    sample_404,
+    sample_422,
+    sample_article_list,
+    sample_channel,
+    sample_channel_list,
+)
 from app.schemas import Article, Channel, ChannelCreate
 from app.database import get_db_session
 
@@ -46,6 +52,7 @@ def get_channels(db: Session = Depends(get_db_session)) -> List[Channel]:
 def get_channel(channel_id: int, db: Session = Depends(get_db_session)) -> Channel:
     return ChannelsService.get_channel_by_id(db_session=db, channel_id=channel_id)
 
+
 @channels_router.get(
     "/{channel_id}/articles",
     responses={
@@ -64,8 +71,11 @@ def get_channel(channel_id: int, db: Session = Depends(get_db_session)) -> Chann
         },
     },
 )
-def get_channel_articles(channel_id: int, db: Session = Depends(get_db_session)) -> List[Article]:
+def get_channel_articles(
+    channel_id: int, db: Session = Depends(get_db_session)
+) -> List[Article]:
     return ChannelsService.get_channel_articles(db_session=db, channel_id=channel_id)
+
 
 @channels_router.post(
     "/",
@@ -81,8 +91,13 @@ def get_channel_articles(channel_id: int, db: Session = Depends(get_db_session))
         },
     },
 )
-def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_session)) -> Channel:
-    return ChannelsService.create_channel(db_session=db, new_channel_name=new_channel.name)
+def add_channel(
+    new_channel: ChannelCreate, db: Session = Depends(get_db_session)
+) -> Channel:
+    return ChannelsService.create_channel(
+        db_session=db, new_channel_name=new_channel.name
+    )
+
 
 @channels_router.put(
     "/",
@@ -102,8 +117,14 @@ def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_session
         },
     },
 )
-def update_channel(updated_channel: Channel, db: Session = Depends(get_db_session)) -> Channel:
-    return ChannelsService.update_channel_name(db_session=db, channel_id=updated_channel.id, new_channel_name=updated_channel.name)
+def update_channel(
+    updated_channel: Channel, db: Session = Depends(get_db_session)
+) -> Channel:
+    return ChannelsService.update_channel_name(
+        db_session=db,
+        channel_id=updated_channel.id,
+        new_channel_name=updated_channel.name,
+    )
 
 
 @channels_router.delete(

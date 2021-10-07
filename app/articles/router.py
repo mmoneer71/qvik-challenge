@@ -2,12 +2,19 @@ from typing import List, Optional
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm.session import Session
 
-from app.samples import sample_article, sample_article_list, sample_422, sample_404, sample_bckgrnd
+from app.samples import (
+    sample_article,
+    sample_article_list,
+    sample_422,
+    sample_404,
+    sample_bckgrnd,
+)
 from app.schemas import Article, ArticleCreate, ArticleUpdate
 from app.articles import service as ArticlesService
 from app.database import get_db_session
 
 articles_router = APIRouter()
+
 
 @articles_router.get(
     "/",
@@ -19,8 +26,14 @@ articles_router = APIRouter()
         }
     },
 )
-def get_articles(min_words: Optional[int] = None, max_words: Optional[int] = None,  db: Session = Depends(get_db_session)) -> List[Article]:
-    return ArticlesService.get_articles(db_session=db, min_words=min_words, max_words=max_words)
+def get_articles(
+    min_words: Optional[int] = None,
+    max_words: Optional[int] = None,
+    db: Session = Depends(get_db_session),
+) -> List[Article]:
+    return ArticlesService.get_articles(
+        db_session=db, min_words=min_words, max_words=max_words
+    )
 
 
 @articles_router.get(
@@ -44,6 +57,7 @@ def get_articles(min_words: Optional[int] = None, max_words: Optional[int] = Non
 def get_article(article_id: int, db: Session = Depends(get_db_session)) -> Article:
     return ArticlesService.get_article_by_id(db_session=db, article_id=article_id)
 
+
 @articles_router.post(
     "/",
     responses={
@@ -62,9 +76,22 @@ def get_article(article_id: int, db: Session = Depends(get_db_session)) -> Artic
         },
     },
 )
-def add_article(new_article: ArticleCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db_session)) -> str:
-    resp = ArticlesService.validate_article_and_channel(db_session=db, channel_id=new_article.channel_id, article_url=str(new_article.url))
-    background_tasks.add_task(ArticlesService.create_article, db_session=db, channel_id=new_article.channel_id, article_url=str(new_article.url))
+def add_article(
+    new_article: ArticleCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db_session),
+) -> str:
+    resp = ArticlesService.validate_article_and_channel(
+        db_session=db,
+        channel_id=new_article.channel_id,
+        article_url=str(new_article.url),
+    )
+    background_tasks.add_task(
+        ArticlesService.create_article,
+        db_session=db,
+        channel_id=new_article.channel_id,
+        article_url=str(new_article.url),
+    )
     return resp
 
 
@@ -86,8 +113,15 @@ def add_article(new_article: ArticleCreate, background_tasks: BackgroundTasks, d
         },
     },
 )
-def update_article_channel(updated_article: ArticleUpdate, db: Session = Depends(get_db_session)) -> Article:
-    return ArticlesService.update_article(db_session=db, article_id=updated_article.id, new_channel_name=updated_article.channel_name)
+def update_article_channel(
+    updated_article: ArticleUpdate, db: Session = Depends(get_db_session)
+) -> Article:
+    return ArticlesService.update_article(
+        db_session=db,
+        article_id=updated_article.id,
+        new_channel_name=updated_article.channel_name,
+    )
+
 
 @articles_router.delete(
     "/{article_id}",

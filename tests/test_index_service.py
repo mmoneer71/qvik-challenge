@@ -1,4 +1,3 @@
-
 from app.service import get_sample_index
 
 
