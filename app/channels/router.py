@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm.session import Session
 
-from app.channels.service import delete_channel_by_id, get_channel_by_id, get_all_channels, create_channel, update_channel_name
-from app.samples import sample_404, sample_422, sample_channel, sample_channel_list
-from app.schemas import Channel, ChannelCreate
+from app.channels import service as ChannelsService
+from app.samples import sample_404, sample_422, sample_article_list, sample_channel, sample_channel_list
+from app.schemas import Article, Channel, ChannelCreate
 from app.database import get_db_session
 
 
@@ -22,7 +22,7 @@ channels_router = APIRouter()
     },
 )
 def get_channels(db: Session = Depends(get_db_session)) -> List[Channel]:
-    return get_all_channels(db_session=db)
+    return ChannelsService.get_all_channels(db_session=db)
 
 
 @channels_router.get(
@@ -44,7 +44,28 @@ def get_channels(db: Session = Depends(get_db_session)) -> List[Channel]:
     },
 )
 def get_channel(channel_id: int, db: Session = Depends(get_db_session)) -> Channel:
-    return get_channel_by_id(db_session=db, channel_id=channel_id)
+    return ChannelsService.get_channel_by_id(db_session=db, channel_id=channel_id)
+
+@channels_router.get(
+    "/{channel_id}/articles",
+    responses={
+        200: {
+            "model": List[Article],
+            "description": "Channel Articles retreived successfully",
+            "content": {"application/json": {"example": sample_article_list}},
+        },
+        404: {
+            "description": "Channel not found",
+            "content": {"application/json": {"example": sample_404}},
+        },
+        422: {
+            "description": "Invalid input format",
+            "content": {"application/json": {"example": sample_422}},
+        },
+    },
+)
+def get_channel_articles(channel_id: int, db: Session = Depends(get_db_session)) -> List[Article]:
+    return ChannelsService.get_channel_articles(db_session=db, channel_id=channel_id)
 
 @channels_router.post(
     "/",
@@ -61,7 +82,7 @@ def get_channel(channel_id: int, db: Session = Depends(get_db_session)) -> Chann
     },
 )
 def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_session)) -> Channel:
-    return create_channel(db_session=db, new_channel_name=new_channel.name)
+    return ChannelsService.create_channel(db_session=db, new_channel_name=new_channel.name)
 
 @channels_router.put(
     "/",
@@ -82,7 +103,7 @@ def add_channel(new_channel: ChannelCreate, db: Session = Depends(get_db_session
     },
 )
 def update_channel(updated_channel: Channel, db: Session = Depends(get_db_session)) -> Channel:
-    return update_channel_name(db_session=db, channel_id=updated_channel.id, new_channel_name=updated_channel.name)
+    return ChannelsService.update_channel_name(db_session=db, channel_id=updated_channel.id, new_channel_name=updated_channel.name)
 
 
 @channels_router.delete(
@@ -102,5 +123,5 @@ def update_channel(updated_channel: Channel, db: Session = Depends(get_db_sessio
     },
 )
 def delete_channel(channel_id: int, db: Session = Depends(get_db_session)) -> str:
-    delete_channel_by_id(db_session=db, channel_id=channel_id)
+    ChannelsService.delete_channel_by_id(db_session=db, channel_id=channel_id)
     return "Channel deleted successfully"

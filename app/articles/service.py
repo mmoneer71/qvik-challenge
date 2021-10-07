@@ -1,29 +1,17 @@
 from typing import List, Optional
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
-from newspaper import Article as NewspaperArticle, ArticleException as ThirdPartyArticleException
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from newspaper import ArticleException as ThirdPartyArticleException
 from app.const import HTM_SUFFIX, HTML_SUFFIX
-
 from app.db_models import Channel as DbChannel, Article as DbArticle
 from app.schemas import Article as APIArticle
-from app.articles.utils import strip_tags
+from app.articles.utils import fetch_article_url
 
 
 class ArticleException(HTTPException):
     pass
-
-def _fetch_article_url(article_url: str) -> int:
-    try:
-        news_article = NewspaperArticle(article_url, keep_article_html=True)
-        news_article.download()
-        news_article.parse()
-        striped_article = strip_tags(news_article.article_html)
-        return len(striped_article.strip().split(" "))
-    except ThirdPartyArticleException:
-        raise ArticleException(status_code=422, detail="Invalid article URL")
 
 def get_article_by_id(db_session: Session, article_id: int) -> APIArticle:
     try:
@@ -32,7 +20,7 @@ def get_article_by_id(db_session: Session, article_id: int) -> APIArticle:
     except AttributeError:
         raise ArticleException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
 
-def get_articles(db_session: Session, min_words: Optional[int], max_words: Optional[int]) -> List[APIArticle]:
+def get_articles(db_session: Session, min_words: Optional[int] = None, max_words: Optional[int] = None) -> List[APIArticle]:
     query = db_session.query(DbArticle)
     if min_words:
         query = query.filter(DbArticle.word_count >= min_words)
@@ -44,20 +32,16 @@ def get_articles(db_session: Session, min_words: Optional[int], max_words: Optio
         api_articles.append(APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count))
     return api_articles
 
-def get_channel_articles(db_session: Session, channel_id: int) -> List[APIArticle]:
-    db_articles = db_session.query(DbChannel).filter(DbChannel.id == channel_id).first().articles
-    api_articles = list()
-    for db_article in db_articles:
-        api_articles.append(APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count))
-    return api_articles
-
 def create_article(db_session: Session, article_url: str, channel_id: int) -> APIArticle:
-    article_word_count = _fetch_article_url(article_url=article_url)
-    db_article = DbArticle(url=article_url, channel_id=channel_id, word_count=article_word_count)
-    db_session.add(db_article)
-    db_session.commit()
-    db_session.refresh(db_article)
-    return APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count)
+    try:
+        article_word_count = fetch_article_url(article_url=article_url)
+        db_article = DbArticle(url=article_url, channel_id=channel_id, word_count=article_word_count)
+        db_session.add(db_article)
+        db_session.commit()
+        db_session.refresh(db_article)
+        return APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count)
+    except ThirdPartyArticleException:
+        raise ArticleException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid article URL")
 
 def update_article(db_session: Session, article_id :int, new_channel_name: str) -> APIArticle:
     try:

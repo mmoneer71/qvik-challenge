@@ -4,7 +4,7 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
 from app.db_models import Channel as DbChannel
-from app.schemas import Channel as APIChannel
+from app.schemas import Article as APIArticle, Channel as APIChannel
 
 
 class ChannelException(HTTPException):
@@ -54,3 +54,13 @@ def delete_channel_by_id(db_session: Session, channel_id: int):
     if rows_deleted == 0:
         raise ChannelException(status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found")
     db_session.commit()
+
+def get_channel_articles(db_session: Session, channel_id: int) -> List[APIArticle]:
+    try:
+        db_articles = db_session.query(DbChannel).filter(DbChannel.id == channel_id).first().articles
+        api_articles = list()
+        for db_article in db_articles:
+            api_articles.append(APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count))
+        return api_articles
+    except AttributeError:
+        raise ChannelException(status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found")

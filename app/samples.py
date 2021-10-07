@@ -14,3 +14,6 @@ sample_article_list = [{"id": 1, "url": "http://example.com/article1.html", "wor
 {"id": 2, "url": "http://example.com/article2.html", "word_count": 250, "channel_id": 1}, ]
 
 sample_bckgrnd = "Article will be fetched and created in the background"
+
+sample_urls = ["https://edition.cnn.com/2020/09/21/us/arctic-sea-ice-shrunk-minimum-extent-2020-scn-trnd/index.html",
+                "https://edition.cnn.com/2021/10/06/us/gabby-petito-brian-laundrie-update-wednesday/index.html"]
