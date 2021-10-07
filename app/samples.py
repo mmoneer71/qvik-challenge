@@ -12,3 +12,5 @@ sample_article = {"id": 1, "url": "http://example.com/article1.html", "word_coun
 
 sample_article_list = [{"id": 1, "url": "http://example.com/article1.html", "word_count": 150, "channel_id": 1}, 
 {"id": 2, "url": "http://example.com/article2.html", "word_count": 250, "channel_id": 1}, ]
+
+sample_bckgrnd = "Article will be fetched and created in the background"

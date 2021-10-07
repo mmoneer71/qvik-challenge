@@ -4,6 +4,7 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
 from newspaper import Article as NewspaperArticle, ArticleException as ThirdPartyArticleException
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from app.db_models import Channel as DbChannel, Article as DbArticle
 from app.schemas import Article as APIArticle
@@ -49,30 +50,13 @@ def get_channel_articles(db_session: Session, channel_id: int) -> List[APIArticl
         api_articles.append(APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count))
     return api_articles
 
-def create_article_by_channel_id(db_session: Session, channel_id: int, article_url: str) -> APIArticle:
-    try:
-        article_word_count = _fetch_article_url(article_url=article_url)
-        db_article = DbArticle(url=article_url, channel_id=channel_id, word_count=article_word_count)
-        db_session.add(db_article)
-        db_session.commit()
-        db_session.refresh(db_article)
-        return APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count)
-    except IntegrityError as err:
-        raise ArticleException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Article URL already exists or Invalid channel ID")
-
-def create_article_by_channel_name(db_session: Session, channel_name: str, article_url: str) -> APIArticle:
-    try:
-        article_word_count = _fetch_article_url(article_url=article_url)
-        channel_id = db_session.query(DbChannel).filter(DbChannel.name == channel_name).first().id
-        db_article = DbArticle(url=article_url, channel_id=channel_id, word_count=article_word_count)
-        db_session.add(db_article)
-        db_session.commit()
-        db_session.refresh(db_article)
-        return APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count)
-    except IntegrityError:
-        raise ArticleException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Article URL already exists")
-    except AttributeError:
-        raise ArticleException(status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found")
+def create_article(db_session: Session, article_url: str, channel_id: int) -> APIArticle:
+    article_word_count = _fetch_article_url(article_url=article_url)
+    db_article = DbArticle(url=article_url, channel_id=channel_id, word_count=article_word_count)
+    db_session.add(db_article)
+    db_session.commit()
+    db_session.refresh(db_article)
+    return APIArticle(id=db_article.id, url=db_article.url, channel_id=db_article.channel_id, word_count=db_article.word_count)
 
 def update_article(db_session: Session, article_id :int, new_channel_name: str) -> APIArticle:
     try:
@@ -91,3 +75,12 @@ def delete_article_by_id(db_session: Session, article_id: int):
         raise ArticleException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
     db_session.commit()
 
+
+def validate_article_and_channel(db_session: Session, article_url: str, channel_id: int) -> str:
+    channel = db_session.query(DbChannel).filter(DbChannel.id == channel_id).first()
+    article = db_session.query(DbArticle).filter(DbArticle.url.is_(article_url)).first()
+    if not channel:
+        raise ArticleException(status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found")
+    if article:
+        raise ArticleException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Article URL already exists")
+    return "Article will be fetched and created in the background"

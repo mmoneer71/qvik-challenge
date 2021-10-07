@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic.networks import HttpUrl
 
 
 class Message(BaseModel):
@@ -14,11 +15,12 @@ class Channel(ChannelCreate):
     class Config:
         orm_mode = True
 
-
-class Article(BaseModel):
-    id: int
-    url: str
+class ArticleCreate(BaseModel):
+    url: HttpUrl
     channel_id: int
+
+class Article(ArticleCreate):
+    id: int
     word_count: int
 
     class Config:
