@@ -1,5 +1,18 @@
 # Qvik Challenge - Backend Dev Position
 
+## Overview
+Simple Rest API (Backend) to serve data of different news articles under different channels (Science, Sports, etc).
+
+Tech stack: Python, FastAPI, SQLalchemy, SQLite.
+
+Features include:
+
+- CRUD operations for articles and channels 
+- Store data including article info, channel info, article url and word count in a SQLite database. 
+- Search articles with word count ranges (0-100), (100-500) and (0-501).
+
+
+## Running Locally
 The solution has been written and tested with Python version 3.8.10.
 
 If you want to setup the virtual environment first, please make sure python3.8-venv is installed or install it by running:
