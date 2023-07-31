@@ -7,7 +7,7 @@ Tech stack: Python, FastAPI, SQLalchemy, SQLite.
 
 Features include:
 
-- CRUD operations for articles and channels 
+- CRUD operations for articles and channels.
 - Store data including article info, channel info, article url and word count in a SQLite database. 
 - Search articles with word count ranges (0-100), (100-500) and (0-501).
 
