@@ -7,6 +7,7 @@ from app.networking import app
 
 @pytest.fixture
 def app_client() -> TestClient:
+    # favor yield over return
     return TestClient(app)
 
 
