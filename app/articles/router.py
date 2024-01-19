@@ -86,6 +86,8 @@ def add_article(
         channel_id=new_article.channel_id,
         article_url=str(new_article.url),
     )
+    # this should live in service/business logic layer
+    # unless there is a very very good reason to do it here :)
     background_tasks.add_task(
         ArticlesService.create_article,
         db_session=db,
@@ -141,4 +143,6 @@ def update_article_channel(
 )
 def delete_article(article_id: int, db: Session = Depends(get_db_session)) -> str:
     ArticlesService.delete_article_by_id(db_session=db, article_id=article_id)
+    # return 202 for confirmation instead of a dummy string message
+    # nobody really reads that stuff
     return "Article deleted successfully"
